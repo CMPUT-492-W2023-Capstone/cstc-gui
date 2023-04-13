@@ -79,7 +79,7 @@ async function main() {
     }
 
     data['input_config']['init_args']['media_source'] = mediaSource;
-    data['output_result_config']['init_args']['upload_period'] = uploadPeriod;
+    data['output_result_config']['init_args']['upload_period'] = parseInt(uploadPeriod);
     data['output_result_config']['init_args']['save_csv'] = saveCSV;
     data['legacy'] = legacy;
     
@@ -91,11 +91,7 @@ async function main() {
 
     s.start('Traffic Counter start running; Press any key to terminate the process');
 
-    const py = spawn('python', ['main.py', '--config', 'config.yaml']);
-
-    py.stdout.on('data', (data) => {
-        console.log(`\n${data}\n`);
-    });
+    const py = spawn('python3', ['main.py', '--config', 'config.yaml']);
 
     py.stderr.on('data', (data) => {
         console.log(`\n${data}\n`);

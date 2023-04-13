@@ -37,46 +37,54 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var prompts_1 = require("@clack/prompts");
-var child_process_1 = require("child_process");
-(0, prompts_1.intro)('Welcome to Community Traffic Counter');
+var fs_1 = require("fs");
+var yaml = require('yaml');
+(0, prompts_1.intro)('Welcome to Community Traffic Counter (Press Ctrl + C to exist)');
 function main() {
     return __awaiter(this, void 0, void 0, function () {
-        var shouldContinue, s_1, py, shouldClose;
+        var version, srcFolder, config, data, shouldContinue, saveCSV, newConfig;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0:
-                    process.chdir('../cstc-backend/app/src/');
+                case 0: return [4 /*yield*/, (0, prompts_1.select)({
+                        message: 'Select a version to run.',
+                        options: [
+                            { value: 'v5', label: 'YOLOv5' },
+                            { value: 'v7', label: 'YOLOv7' },
+                        ]
+                    })];
+                case 1:
+                    version = _a.sent();
+                    if ((0, prompts_1.isCancel)(version)) {
+                        (0, prompts_1.cancel)('Operation cancelled.');
+                        return [2 /*return*/];
+                    }
+                    srcFolder = "../cstc-backend-".concat(version, "/app/src");
+                    process.chdir(srcFolder);
+                    config = (0, fs_1.readFileSync)('config.yaml', 'utf-8');
+                    data = yaml.parse(config);
+                    console.log(data);
                     return [4 /*yield*/, (0, prompts_1.confirm)({
                             message: 'Do you want to start running the Traffic Counter?',
                         })];
-                case 1:
+                case 2:
                     shouldContinue = _a.sent();
-                    if (!shouldContinue) return [3 /*break*/, 4];
+                    if ((0, prompts_1.isCancel)(shouldContinue)) {
+                        (0, prompts_1.cancel)('Operation cancelled.');
+                        return [2 /*return*/];
+                    }
                     return [4 /*yield*/, (0, prompts_1.confirm)({
                             message: 'Do you want to export data to this device?',
                         })];
-                case 2:
-                    _a.sent();
-                    s_1 = (0, prompts_1.spinner)();
-                    s_1.start('Traffic Counter start running');
-                    py = (0, child_process_1.spawn)('python', ['main.py', '--config', 'config.yaml']);
-                    py.stdout.on('data', function (data) {
-                        console.log("\n".concat(data, "\n"));
-                    });
-                    py.stderr.on('data', function (data) {
-                        console.log("\n".concat(data, "\n"));
-                    });
-                    py.on('close', function () {
-                        s_1.stop('Traffic Counter stopped');
-                    });
-                    return [4 /*yield*/, (0, prompts_1.confirm)({
-                            message: 'Press Enter to terminate the Traffic Counter',
-                        })];
                 case 3:
-                    shouldClose = _a.sent();
-                    py.kill('SIGKILL');
-                    _a.label = 4;
-                case 4: return [2 /*return*/];
+                    saveCSV = _a.sent();
+                    if ((0, prompts_1.isCancel)(saveCSV)) {
+                        (0, prompts_1.cancel)('Operation cancelled.');
+                        return [2 /*return*/];
+                    }
+                    data['output_result_config']['init_args']['save_csv'] = saveCSV;
+                    newConfig = yaml.stringify(data);
+                    (0, fs_1.writeFileSync)('config.yaml', newConfig, { encoding: 'utf-8', flag: 'w' });
+                    return [2 /*return*/];
             }
         });
     });
